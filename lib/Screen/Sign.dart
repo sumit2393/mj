@@ -12,7 +12,7 @@ class _SignupState extends State<Signup> {
     return Scaffold(
     body: new Container(
     decoration: new BoxDecoration(
-    image: new DecorationImage(image: new AssetImage("assets/images/pearl.jpg"), fit: BoxFit.cover,colorFilter: ColorFilter.mode(Colors.red.withOpacity(0.4), BlendMode.dstIn)),
+    image: new DecorationImage(image: new AssetImage("assets/images/pearl.jpg"), fit: BoxFit.cover,colorFilter: ColorFilter.mode(Colors.red.withOpacity(0.3), BlendMode.dstIn)),
 
     ),
 
