@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './Home.dart';
 import './product.dart';
+import './productdetail.dart';
 
 const tabsdata = [
   "assets/images/home/Home_ICon.png",
@@ -54,7 +55,7 @@ class Initial extends StatelessWidget {
                 )))
             .toList(),
       ),
-      body: ProduclList(),
+      body: ProductDetail(),
 
       // body: TabBarView(children: [
       //   new Icon(
