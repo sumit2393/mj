@@ -47,6 +47,8 @@ flutter:
       - assets/images/dummybrace.jpg
       - assets/images/dummynecklace.jpeg
       - assets/images/home/
+      - assets/images/product/
+      - assets/images/Homepage/
 
 
   # An image asset can refer to one or more resolution-specific "variants", see

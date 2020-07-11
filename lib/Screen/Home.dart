@@ -75,7 +75,6 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.max,
               children: <Widget>[
                 Expanded(
-                  flex: 3,
                   child: Container(
                       margin: EdgeInsets.only(right: 5),
                       height: 250,
@@ -86,33 +85,32 @@ class _HomeState extends State<Home> {
                                   AssetImage("assets/images/dummybrace.jpg")))),
                 ),
                 Expanded(
-                    flex: 4,
                     child: Column(
                         mainAxisSize: MainAxisSize.max,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          Container(
-                              height: 100,
-                              // width: 200,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          "assets/images/dummynecklace.jpeg")))),
-                          new SizedBox(
-                            height: 5,
-                          ),
-                          Container(
-                              height: 145,
-                              //width: 300,
-                              decoration: BoxDecoration(
-                                  color: Colors.black,
-                                  image: DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: AssetImage(
-                                          "assets/images/dummybangles.jpeg")))),
-                        ]))
+                      Container(
+                          height: 100,
+                          // width: 200,
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: AssetImage(
+                                      "assets/images/dummynecklace.jpeg")))),
+                      new SizedBox(
+                        height: 5,
+                      ),
+                      Container(
+                          height: 145,
+                          //width: 300,
+                          decoration: BoxDecoration(
+                              color: Colors.black,
+                              image: DecorationImage(
+                                  fit: BoxFit.cover,
+                                  image: AssetImage(
+                                      "assets/images/dummybangles.jpeg")))),
+                    ]))
               ],
             )),
         GridView.count(
@@ -188,6 +186,7 @@ class _HomeState extends State<Home> {
                     )),
                     Expanded(
                         child: Container(
+                      margin: EdgeInsets.only(left: 15),
                       height: 200,
                       child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './Home.dart';
+import './product.dart';
 
 const tabsdata = [
   "assets/images/home/Home_ICon.png",
@@ -12,10 +13,17 @@ const tabsdata = [
 class Initial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: Image.asset(
-          "assets/images/home/Menu-Icon.png",
-          height: 2,
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(30.0),
+        child: AppBar(
+          leading: Padding(
+            padding: EdgeInsets.all(8),
+            child: Image.asset(
+              "assets/images/home/Menu-Icon.png",
+              height: 24,
+              width: 24,
+            ),
+          ),
         ),
       ),
       drawer: Drawer(
@@ -46,7 +54,7 @@ class Initial extends StatelessWidget {
                 )))
             .toList(),
       ),
-      body: Home(),
+      body: ProduclList(),
 
       // body: TabBarView(children: [
       //   new Icon(
