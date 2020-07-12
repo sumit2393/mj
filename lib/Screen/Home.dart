@@ -229,7 +229,7 @@ class _HomeState extends State<Home> {
                       children: <Widget>[
                         Expanded(
                             child: Container(
-                          height: 200,
+                          height: 150,
                           decoration: BoxDecoration(
                               image: DecorationImage(
                                   fit: BoxFit.cover,
@@ -240,7 +240,7 @@ class _HomeState extends State<Home> {
                             child: Container(
                           color: Colors.white,
                           margin: EdgeInsets.only(left: 15),
-                          height: 200,
+                          height: 150,
                           child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
