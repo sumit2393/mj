@@ -7,6 +7,25 @@ class ProductDetail extends StatefulWidget {
 class ProductDetailState extends State<ProductDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: PreferredSize(
+        preferredSize: Size.fromHeight(32.0),
+        child: AppBar(
+          actions: <Widget>[
+            Image.asset(
+              "assets/images/home/Bell_Icon.png",
+              height: 14,
+              width: 14,
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Image.asset(
+                  "assets/images/product/Search_Icon.png",
+                  height: 16,
+                  width: 16,
+                ))
+          ],
+        ),
+      ),
       backgroundColor: Colors.grey[50],
       body: Stack(children: <Widget>[
         ListView(

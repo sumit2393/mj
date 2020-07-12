@@ -15,7 +15,7 @@ class Initial extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(30.0),
+        preferredSize: Size.fromHeight(32.0),
         child: AppBar(
           leading: Padding(
             padding: EdgeInsets.all(8),
@@ -25,6 +25,20 @@ class Initial extends StatelessWidget {
               width: 24,
             ),
           ),
+          actions: <Widget>[
+            Image.asset(
+              "assets/images/home/Bell_Icon.png",
+              height: 14,
+              width: 14,
+            ),
+            Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Image.asset(
+                  "assets/images/product/Search_Icon.png",
+                  height: 16,
+                  width: 16,
+                ))
+          ],
         ),
       ),
       drawer: Drawer(
@@ -55,7 +69,7 @@ class Initial extends StatelessWidget {
                 )))
             .toList(),
       ),
-      body: ProductDetail(),
+      body: Home(),
 
       // body: TabBarView(children: [
       //   new Icon(

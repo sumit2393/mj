@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './productdetail.dart';
 
 class ProduclList extends StatefulWidget {
   _ProduclListstate createState() => _ProduclListstate();
@@ -25,6 +26,27 @@ class _ProduclListstate extends State<ProduclList> {
 
   Widget build(BuildContext context) {
     return Scaffold(
+        // appBar: PreferredSize(
+        //   preferredSize: Size.fromHeight(32.0),
+        //   child: AppBar(
+        //     backgroundColor: Color(0xFF670e1e).withOpacity(0.1),
+
+        //     actions: <Widget>[
+        //       Image.asset(
+        //         "assets/images/home/Bell_Icon.png",
+        //         height: 14,
+        //         width: 14,
+        //       ),
+        //       Padding(
+        //           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        //           child: Image.asset(
+        //             "assets/images/product/Search_Icon.png",
+        //             height: 16,
+        //             width: 16,
+        //           ))
+        //     ],
+        //   ),
+        // ),
         body: Stack(children: <Widget>[
       ListView(
         padding: EdgeInsets.only(bottom: 50),
@@ -46,6 +68,29 @@ class _ProduclListstate extends State<ProduclList> {
             //   ),
             // ),
             child: Stack(children: <Widget>[
+              Positioned(
+                  left: 0,
+                  top: 20,
+                  child: Row(
+                    children: <Widget>[
+                      FlatButton.icon(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                        label: Text(
+                          "Bracelets",
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                      )
+
+                      // Image.asset('assets/images/home/Bell_Icon.png',
+                      //     height: 12)
+                    ],
+                  )),
               Positioned(
                 left: 0.0,
                 bottom: 0.0,
@@ -157,7 +202,10 @@ class _ProduclListstate extends State<ProduclList> {
                                           color: Colors.white, fontSize: 8),
                                     ),
                                     onPressed: () {
-                                      print("request call");
+                                      Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  ProductDetail()));
                                     }))
                           ]),
                           Positioned(
