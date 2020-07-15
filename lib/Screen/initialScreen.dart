@@ -2,28 +2,64 @@ import 'package:flutter/material.dart';
 import './Home.dart';
 import './product.dart';
 import './productdetail.dart';
+import './Wishlist.dart';
 
-const tabsdata = [
-  "assets/images/home/Home_ICon.png",
-  "assets/images/home/Recent_ICon.png",
-  "assets/images/home/Offer_ICon.png",
-  "assets/images/home/Gold_icon.png",
-  "assets/images/home/Cart_ICon.png"
+List<dynamic> tabsdata = [
+  {"icon": "assets/images/home/Home_ICon.png", "page": Home(), "title": ""},
+  {
+    "icon": "assets/images/home/Recent_ICon.png",
+    "page": Wishlist(),
+    "title": "Wishlist"
+  },
+  {
+    "icon": "assets/images/home/Offer_ICon.png",
+    "page": Wishlist(),
+    "title": "offer"
+  },
+  // {"icon":"assets/images/home/Gold_icon.png"},
+  // {"icon":"assets/images/home/Cart_ICon.png"}
 ];
 
-class Initial extends StatelessWidget {
+const drawerdata = [
+  {"name": "Profile", "moveto": ""},
+  {"name": "Collection", "moveto": ""},
+  {"name": "Products", "moveto": ""},
+  {"name": "About", "moveto": ""},
+  {"name": "Contact us", "moveto": ""},
+];
+
+class Initial extends StatefulWidget {
+  @override
+  _InitialState createState() => _InitialState();
+}
+
+class _InitialState extends State<Initial> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
+      key: _scaffoldKey,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(32.0),
         child: AppBar(
+          centerTitle: true,
+          title: Text(tabsdata[_selectedIndex]["title"]),
           leading: Padding(
             padding: EdgeInsets.all(8),
-            child: Image.asset(
-              "assets/images/home/Menu-Icon.png",
-              height: 24,
-              width: 24,
-            ),
+            child: GestureDetector(
+                onTap: () => _scaffoldKey.currentState.openDrawer(),
+                child: Image.asset(
+                  "assets/images/home/Menu-Icon.png",
+                  height: 24,
+                  width: 24,
+                )),
           ),
           actions: <Widget>[
             Image.asset(
@@ -41,58 +77,95 @@ class Initial extends StatelessWidget {
           ],
         ),
       ),
-      drawer: Drawer(
-          child: ListView(
-        children: <Widget>[
-          ListTile(
-            title: Text("item1"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-          ListTile(
-            title: Text("item2"),
-            onTap: () {
-              Navigator.pop(context);
-            },
-          ),
-        ],
-      )),
+      drawer: ClipRRect(
+          borderRadius: BorderRadius.only(
+              topRight: Radius.circular(45), bottomRight: Radius.circular(45)),
+          child: Container(
+            width: MediaQuery.of(context).size.width - 80,
+            child: Drawer(
+                child: ListView(
+              padding: EdgeInsets.symmetric(horizontal: 40),
+              children: <Widget>[
+                buildDrawer(context),
+                buildListTile(context, {"name": "Profile", "goto": ""}),
+                Divider(),
+                buildListTile(context, {"name": "Collection", "goto": ""}),
+                Divider(),
+                buildListTile(context, {"name": "Products", "goto": ""}),
+                Divider(),
+                buildListTile(context, {"name": "About", "goto": ""}),
+                Divider(),
+                buildListTile(context, {"name": "Contact us", "goto": ""}),
+              ],
+            )),
+          )),
       bottomNavigationBar: BottomNavigationBar(
+        backgroundColor: Theme.of(context).primaryColor,
+        type: BottomNavigationBarType.fixed,
         items: tabsdata
             .map((e) => BottomNavigationBarItem(
                 backgroundColor: Color(0xFF670e1e),
                 title: Text(""),
                 icon: Image.asset(
-                  e,
+                  e["icon"],
                   height: 24,
                 )))
             .toList(),
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
       ),
-      body: Home(),
+      body: tabsdata.elementAt(_selectedIndex)["page"],
+    );
+  }
 
-      // body: TabBarView(children: [
-      //   new Icon(
-      //     Icons.directions_car,
-      //     size: 50.0,
-      //   ),
-      //   new Icon(
-      //     Icons.directions_transit,
-      //     size: 50.0,
-      //   ),
-      //   new Icon(
-      //     Icons.directions_bike,
-      //     size: 50.0,
-      //   ),
-      //   new Icon(
-      //     Icons.directions_bike,
-      //     size: 50.0,
-      //   ),
-      //   new Icon(
-      //     Icons.directions_bike,
-      //     size: 50.0,
-      //   ),
-      // ])
+  Container buildDrawer(BuildContext context) {
+    return Container(
+      height: 150,
+      child: DrawerHeader(
+        padding: EdgeInsets.all(0),
+        decoration: BoxDecoration(
+            border: Border(
+          bottom: Divider.createBorderSide(context,
+              color: Colors.white, width: 0.0),
+        )),
+        child: Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(50),
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                          blurRadius: 2.0,
+                          offset: -Offset(1, 1),
+                          color: Colors.white),
+                      BoxShadow(
+                          blurRadius: 2.0,
+                          offset: Offset(1, 1),
+                          color: Colors.grey.shade400)
+                    ]),
+                child: IconButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  icon: Icon(Icons.arrow_back),
+                  color: Theme.of(context).primaryColor,
+                ))),
+      ),
+    );
+  }
+
+  ListTile buildListTile(BuildContext context, info) {
+    return ListTile(
+      title: Text(
+        info["name"],
+        style: TextStyle(color: Theme.of(context).primaryColor, fontSize: 18),
+      ),
+      trailing: Icon(Icons.arrow_forward_ios,
+          size: 14, color: Theme.of(context).primaryColor),
+      onTap: () {
+        Navigator.pop(context);
+      },
     );
   }
 }

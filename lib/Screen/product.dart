@@ -61,7 +61,6 @@ class _ProduclListstate extends State<ProduclList> {
               image: new AssetImage("assets/images/product/Background.png"),
             )),
             // foregroundDecoration: BoxDecoration(
-            //   image: DecorationImage(
             //     image: AssetImage(
             //       "assets/images/product/diamond.png",
             //     ),
@@ -123,12 +122,12 @@ class _ProduclListstate extends State<ProduclList> {
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: <Widget>[
                   filter({
-                    "image": "assets/images/home/Cart_ICon.png",
+                    "image": "assets/images/product/Filter_Icon.png",
                     "name": "FILTER",
                     "size": 14.0
                   }),
                   filter({
-                    "image": "assets/images/home/Cart_ICon.png",
+                    "image": "assets/images/product/Sort_Icon.png",
                     "name": "SORT",
                     "size": 14.0
                   }),
