@@ -3,6 +3,8 @@ import './Home.dart';
 import './product.dart';
 import './productdetail.dart';
 import './Wishlist.dart';
+import './Notification.dart';
+import './Profile_Screen.dart';
 
 List<dynamic> tabsdata = [
   {"icon": "assets/images/home/Home_ICon.png", "page": Home(), "title": ""},
@@ -47,12 +49,12 @@ class _InitialState extends State<Initial> {
     return Scaffold(
       key: _scaffoldKey,
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(32.0),
+        preferredSize: Size.fromHeight(40.0),
         child: AppBar(
           centerTitle: true,
           title: Text(tabsdata[_selectedIndex]["title"]),
           leading: Padding(
-            padding: EdgeInsets.all(8),
+            padding: EdgeInsets.all(10),
             child: GestureDetector(
                 onTap: () => _scaffoldKey.currentState.openDrawer(),
                 child: Image.asset(
@@ -62,11 +64,14 @@ class _InitialState extends State<Initial> {
                 )),
           ),
           actions: <Widget>[
-            Image.asset(
-              "assets/images/home/Bell_Icon.png",
-              height: 14,
-              width: 14,
-            ),
+            GestureDetector(
+                onTap: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => Notificationlist())),
+                child: Image.asset(
+                  "assets/images/home/Bell_Icon.png",
+                  height: 14,
+                  width: 14,
+                )),
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Image.asset(
@@ -87,7 +92,8 @@ class _InitialState extends State<Initial> {
               padding: EdgeInsets.symmetric(horizontal: 40),
               children: <Widget>[
                 buildDrawer(context),
-                buildListTile(context, {"name": "Profile", "goto": ""}),
+                buildListTile(
+                    context, {"name": "Profile", "goto": Profile_Screen()}),
                 Divider(),
                 buildListTile(context, {"name": "Collection", "goto": ""}),
                 Divider(),
@@ -164,7 +170,11 @@ class _InitialState extends State<Initial> {
       trailing: Icon(Icons.arrow_forward_ios,
           size: 14, color: Theme.of(context).primaryColor),
       onTap: () {
+        print("called");
+        print(info["goto"]);
         Navigator.pop(context);
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => info["goto"]));
       },
     );
   }

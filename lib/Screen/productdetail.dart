@@ -8,7 +8,7 @@ class ProductDetailState extends State<ProductDetail> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(32.0),
+        preferredSize: Size.fromHeight(40.0),
         child: AppBar(
           actions: <Widget>[
             Image.asset(

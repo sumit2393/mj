@@ -8,8 +8,6 @@ class ProductList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("productlist");
-    print(productlist);
     return GridView.builder(
         padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         itemCount: productlist.length,
