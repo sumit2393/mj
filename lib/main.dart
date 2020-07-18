@@ -3,6 +3,7 @@ import 'package:flutter_app_mbj/Screen/Sign.dart';
 import "Screen/Home.dart";
 import 'Screen/initialScreen.dart';
 import 'Screen/login.dart';
+import 'Screen/landing_screen.dart';
 
 void main() => runApp(MyApp());
 
@@ -18,6 +19,6 @@ class MyApp extends StatelessWidget {
             buttonTheme: ButtonThemeData(
                 buttonColor: Color(0xFF670e1e),
                 textTheme: ButtonTextTheme.primary)),
-        home: Initial());
+        home: LandingScreen());
   }
 }

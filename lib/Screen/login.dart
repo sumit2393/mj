@@ -4,6 +4,9 @@ import 'package:flutter/services.dart';
 
 import 'package:flutter_app_mbj/Screen/SignUp.dart';
 
+import 'Home.dart';
+import 'initialScreen.dart';
+
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -255,15 +258,16 @@ class _LoginMobileOTPScreenState extends State<LoginMobileOTPScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
                         Text(
-                          'Continue',
+                          'Submit',
                           style: TextStyle(color: Colors.black, fontSize: 20),
                         ),
+
                       ],
                     ),
                   ),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => LoginMobileOTPScreen()));
+                        builder: (context) => Initial()));
                   },
                 ),
               ),
