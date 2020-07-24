@@ -1,10 +1,33 @@
+//import 'dart:js';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../provider/httpservices.dart';
 
 class ProductList extends StatelessWidget {
   final productlist;
   final sideicon;
+  final userid;
 
-  ProductList(this.productlist, this.sideicon);
+  ProductList(this.productlist, this.sideicon, this.userid);
+
+  requestCall(productid) {
+    requestCallback(productid, userid).then((value) => {
+          if (value["status"] == "success")
+            {registerToast(value["data"]["message"])}
+          else
+            {registerToast("Something went wrong")}
+        });
+  }
+
+  registerToast(String toast) {
+    return Fluttertoast.showToast(
+        msg: toast,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF670e1e),
+        textColor: Colors.white);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,23 +67,27 @@ class ProductList extends StatelessWidget {
                               image: DecorationImage(
                                   fit: BoxFit.cover,
                                   image: AssetImage(
-                                      productlist[index]["image"]))))),
-                  Text(productlist[index]["name"]),
+                                      "assets/images/dummynecklace.jpeg"))))),
+                  Text(productlist[index].product.name),
                   Padding(
                       padding: EdgeInsets.symmetric(vertical: 7),
                       child: Text(
-                        productlist[index]["name"],
+                        productlist[index].product.name,
                         style: TextStyle(fontSize: 12),
                       )),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
-                      Text("\u20B9" + '1,54,748',
+                      Text(
+                          "\u20B9" +
+                              productlist[index].product.tagPrice.toString(),
                           style: TextStyle(
                             color: Theme.of(context).primaryColor,
                             fontWeight: FontWeight.bold,
                           )),
-                      Text("\u20B9" + '1,54,748',
+                      Text(
+                          "\u20B9" +
+                              productlist[index].product.price.toString(),
                           style: TextStyle(
                               color: Colors.grey,
                               fontWeight: FontWeight.w500,
@@ -80,10 +107,7 @@ class ProductList extends StatelessWidget {
                             style: TextStyle(color: Colors.white, fontSize: 8),
                           ),
                           onPressed: () {
-                            // Navigator.of(context).push(
-                            //     MaterialPageRoute(
-                            //         builder: (context) =>
-                            //             ProductDetail()));
+                            requestCall(productlist[index].product.id);
                           }))
                 ]),
                 Positioned(

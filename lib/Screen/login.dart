@@ -1,8 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:http/http.dart' as http;
 
 import 'package:flutter_app_mbj/Screen/SignUp.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'Home.dart';
 import 'initialScreen.dart';
@@ -13,6 +18,65 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  String phone, id;
+
+  @override
+  void initState() {
+    super.initState();
+    phone = "phone";
+  }
+
+  save() async {
+    Map<dynamic, dynamic> rawBody = {
+      "phone": phone,
+    };
+    final response =
+        await http.post("http://greenergy.me/api/auth/get-otp", body: rawBody);
+    var data = jsonDecode(response.body);
+    print(data.toString());
+
+    if (data["status"] == 'success') {
+      String message = data['data']['message'];
+
+//      registerToast(message);
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Container(
+              height: 100,
+              child: SimpleDialog(
+                children: <Widget>[
+                  RaisedButton(
+                    child: Text(
+                      "Ok",
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => LoginMobileOTPScreen()));
+                    },
+                  )
+                ],
+                title: Text(message),
+              ),
+            );
+          });
+    } else {
+      List<dynamic> errors = data["errors"];
+      errors.forEach((element) {
+        registerToast(element["errorMessage"]);
+      });
+    }
+  }
+
+  registerToast(String toast) {
+    return Fluttertoast.showToast(
+        msg: toast,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white);
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -48,38 +112,42 @@ class _LoginState extends State<Login> {
             Container(
               padding: EdgeInsets.only(left: 25, right: 25),
               child: TextField(
-                keyboardType: TextInputType.number,
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20,
-                  decorationStyle: TextDecorationStyle.solid,
-                ),
-                inputFormatters: <TextInputFormatter>[
-                  WhitelistingTextInputFormatter.digitsOnly
-                ],
-                maxLength: 10,
-                decoration: new InputDecoration(
-                    prefixIcon: Icon(
-                      Icons.mobile_screen_share,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                    enabledBorder: new OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
-                        ),
-                        borderSide: BorderSide(color: Colors.white)),
-                    focusedBorder: new OutlineInputBorder(
-                        borderRadius: const BorderRadius.all(
-                          const Radius.circular(10.0),
-                        ),
-                        borderSide: BorderSide(color: Colors.white)),
-                    counterText: '',
-                    filled: true,
-                    hintStyle: new TextStyle(color: Colors.white),
-                    hintText: "+91",
-                    fillColor: Color.fromRGBO(140, 0, 0, 0.1)),
-              ),
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    decorationStyle: TextDecorationStyle.solid,
+                  ),
+                  inputFormatters: <TextInputFormatter>[
+                    WhitelistingTextInputFormatter.digitsOnly
+                  ],
+                  maxLength: 10,
+                  decoration: new InputDecoration(
+                      prefixIcon: Icon(
+                        Icons.mobile_screen_share,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      enabledBorder: new OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
+                          borderSide: BorderSide(color: Colors.white)),
+                      focusedBorder: new OutlineInputBorder(
+                          borderRadius: const BorderRadius.all(
+                            const Radius.circular(10.0),
+                          ),
+                          borderSide: BorderSide(color: Colors.white)),
+                      counterText: '',
+                      filled: true,
+                      hintStyle: new TextStyle(color: Colors.white),
+                      hintText: "+91",
+                      fillColor: Color.fromRGBO(140, 0, 0, 0.1)),
+                  onChanged: (input) {
+                    setState(() {
+                      phone = input;
+                    });
+                  }),
             ),
             SizedBox(
               height: 20,
@@ -156,8 +224,7 @@ class _LoginState extends State<Login> {
                   ),
                 ),
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => LoginMobileOTPScreen()));
+                  save();
                 },
               ),
             ),
@@ -174,6 +241,52 @@ class LoginMobileOTPScreen extends StatefulWidget {
 }
 
 class _LoginMobileOTPScreenState extends State<LoginMobileOTPScreen> {
+  String phone, otp, id;
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  Otp() async {
+    Map<dynamic, dynamic> rawBody = {
+      "otp": otp,
+    };
+    print(rawBody);
+
+    final response = await http.post(
+        "http://greenergy.me/api/auth/verify-otp-to-login",
+        body: rawBody);
+
+    var data = jsonDecode(response.body);
+    print(data);
+
+    if (data["status"] == 'success') {
+      //String user = data['data']['user'];
+      savePref(
+          data["data"]["user"]["id"],
+          data["data"]["user"]["email"],
+          data["data"]["user"]["name"],
+          data["data"]["user"]["phone"],
+          data["data"]["user"]["dob"],
+          data["data"]["user"]["anniversary_date"]);
+      setState(() {
+        Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => Initial()));
+      });
+    }
+  }
+
+  savePref(int user_id, String email, String name, String phone, String dob,
+      String anniversary_date) async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setInt("id", user_id);
+    preferences.setString("name", name);
+    preferences.setString("phone", phone);
+    preferences.setString("dob", dob);
+    preferences.setString("anniversary_date", anniversary_date);
+    //preferences.commit();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -212,25 +325,21 @@ class _LoginMobileOTPScreenState extends State<LoginMobileOTPScreen> {
                 showFieldAsBox: true,
                 fields: 4,
                 onSubmit: (String pin) {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text("Pin"),
-                          content: Text('Pin entered is $pin'),
-                        );
-                      }); //end showDialog()
+                  otp = pin;
                 }, // end onSubmit
               ),
               SizedBox(
                 height: 20,
               ),
-              Text(
-                "Resend OTP",
-                style: TextStyle(
-                    color: Colors.white,
-                    decoration: TextDecoration.underline,
-                    fontSize: 20),
+              GestureDetector(
+                onTap: () {},
+                child: Text(
+                  "Resend OTP",
+                  style: TextStyle(
+                      color: Colors.white,
+                      decoration: TextDecoration.underline,
+                      fontSize: 20),
+                ),
               ),
               SizedBox(
                 height: 20,
@@ -261,13 +370,11 @@ class _LoginMobileOTPScreenState extends State<LoginMobileOTPScreen> {
                           'Submit',
                           style: TextStyle(color: Colors.black, fontSize: 20),
                         ),
-
                       ],
                     ),
                   ),
                   onPressed: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => Initial()));
+                    Otp();
                   },
                 ),
               ),

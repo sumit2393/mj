@@ -106,6 +106,8 @@ class _InitialState extends State<Initial> {
             )),
           )),
       bottomNavigationBar: BottomNavigationBar(
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         backgroundColor: Theme.of(context).primaryColor,
         type: BottomNavigationBarType.fixed,
         items: tabsdata
@@ -170,8 +172,6 @@ class _InitialState extends State<Initial> {
       trailing: Icon(Icons.arrow_forward_ios,
           size: 14, color: Theme.of(context).primaryColor),
       onTap: () {
-        print("called");
-        print(info["goto"]);
         Navigator.pop(context);
         Navigator.of(context)
             .push(MaterialPageRoute(builder: (context) => info["goto"]));

@@ -1,31 +1,27 @@
 import 'package:flutter/material.dart';
 import './productdetail.dart';
+import '../provider/httpservices.dart';
 
 class ProduclList extends StatefulWidget {
+  final mdata;
+  ProduclList({this.mdata});
   _ProduclListstate createState() => _ProduclListstate();
 }
 
 class _ProduclListstate extends State<ProduclList> {
   final scaffoldState = GlobalKey<ScaffoldState>();
   PersistentBottomSheetController _controller;
+  List categoriesname = [];
+  List productlist = [];
+  // var productlist = [
+  //   {"image": "assets/images/Homepage/6.png", "name": "Fashion Necklace"},
+  //   {"image": "assets/images/Homepage/9.png", "name": "Fashion Necklace"},
+  //   {"image": "assets/images/Homepage/10.png", "name": "Fashion Necklace"},
+  //   {"image": "assets/images/Homepage/11.png", "name": "Fashion Necklace"},
+  //   {"image": "assets/images/Homepage/12.png", "name": "Fashion Necklace"},
+  //   {"image": "assets/images/Homepage/13.png", "name": "Fashion Necklace"},
+  // ];
 
-  var productlist = [
-    {"image": "assets/images/Homepage/6.png", "name": "Fashion Necklace"},
-    {"image": "assets/images/Homepage/9.png", "name": "Fashion Necklace"},
-    {"image": "assets/images/Homepage/10.png", "name": "Fashion Necklace"},
-    {"image": "assets/images/Homepage/11.png", "name": "Fashion Necklace"},
-    {"image": "assets/images/Homepage/12.png", "name": "Fashion Necklace"},
-    {"image": "assets/images/Homepage/13.png", "name": "Fashion Necklace"},
-  ];
-
-  var categoriesname = [
-    "ALL",
-    "BRACELET",
-    "EARRINGS",
-    "NECKLACE",
-    "PENDANT",
-    "RING"
-  ];
   List<dynamic> sortarray = [
     {
       "title": "Price High to Low",
@@ -53,10 +49,37 @@ class _ProduclListstate extends State<ProduclList> {
   String dropdownstoneValue;
   String dropdownpriceValue;
   String dropdowntypeValue;
+
+  @override
+  void initState() {
+    super.initState();
+    print(widget.mdata.id);
+    getCategories(widget.mdata.id);
+  }
+
+  getCategories(id) {
+    fetchCategories(id).then((value) => {
+          print(value),
+          print(value.allproducts),
+          setState(() {
+            // productlist = value.allproducts;
+            categoriesname = value.subcategories;
+          }),
+          print(categoriesname[0].name),
+        });
+  }
+
+  getProductList(id) {
+    print(id);
+    fetchProductlist(id).then((value) => setState(() {
+          productlist = value.getProducts();
+          print(productlist);
+        }));
+  }
+
   openSort() async {
     _controller = await scaffoldState.currentState.showBottomSheet(
       (BuildContext context) {
-        //print("nbbb");
         return Wrap(
           alignment: WrapAlignment.center,
           children: <Widget>[
@@ -245,17 +268,30 @@ class _ProduclListstate extends State<ProduclList> {
         body: Stack(children: <Widget>[
           ListView(
             padding: EdgeInsets.only(bottom: 50),
-            shrinkWrap: true,
+            //shrinkWrap: true,
             children: <Widget>[
               Container(
-                height: 200,
+                height: 250,
                 padding: EdgeInsets.all(12),
+                foregroundDecoration: BoxDecoration(
+                    image: DecorationImage(
+                        image:
+                            NetworkImage(widget.mdata.imageUrl, scale: 20.0))),
                 decoration: BoxDecoration(
                     image: DecorationImage(
                   fit: BoxFit.cover,
                   image: new AssetImage("assets/images/product/Background.png"),
                 )),
                 child: Stack(children: <Widget>[
+                  Positioned.fill(
+                    bottom: 50,
+                    child: Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Text(
+                          widget.mdata.name,
+                          style: TextStyle(color: Colors.white, fontSize: 26),
+                        )),
+                  ),
                   Positioned(
                       left: 0,
                       top: 20,
@@ -298,9 +334,14 @@ class _ProduclListstate extends State<ProduclList> {
                             scrollDirection: Axis.horizontal,
                             itemCount: categoriesname.length,
                             itemBuilder: (context, index) {
-                              return Text(
-                                categoriesname[index],
-                                style: TextStyle(color: Colors.white),
+                              return GestureDetector(
+                                onTap: () {
+                                  getProductList(categoriesname[index].id);
+                                },
+                                child: Text(
+                                  categoriesname[index].name,
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               );
                             })),
                   )
@@ -325,94 +366,112 @@ class _ProduclListstate extends State<ProduclList> {
                       }),
                     ],
                   )),
-              Container(
-                  color: Theme.of(context).primaryColor,
-                  child: GridView.builder(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-                      itemCount: productlist.length,
-                      shrinkWrap: true,
-                      physics: ScrollPhysics(),
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        mainAxisSpacing: 18,
-                        crossAxisSpacing: 16,
-                        crossAxisCount: 2,
-                        childAspectRatio: MediaQuery.of(context).size.width /
-                            (MediaQuery.of(context).size.height - 200),
-                      ),
-                      itemBuilder: (context, index) {
-                        return Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white,
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 12),
-                            child: Stack(children: <Widget>[
-                              Column(children: <Widget>[
-                                Expanded(
-                                    child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.white,
-                                            image: DecorationImage(
-                                                fit: BoxFit.cover,
-                                                image: AssetImage(
-                                                    productlist[index]
-                                                        ["image"]))))),
-                                Text(productlist[index]["name"]),
-                                Padding(
-                                    padding: EdgeInsets.symmetric(vertical: 7),
-                                    child: Text(
-                                      productlist[index]["name"],
-                                      style: TextStyle(fontSize: 12),
-                                    )),
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceAround,
-                                  children: <Widget>[
-                                    Text("\u20B9" + '1,54,748',
-                                        style: TextStyle(
-                                          color: Theme.of(context).primaryColor,
-                                          fontWeight: FontWeight.bold,
-                                        )),
-                                    Text("\u20B9" + '1,54,748',
-                                        style: TextStyle(
-                                            color: Colors.grey,
-                                            fontWeight: FontWeight.w500,
-                                            fontSize: 10)),
-                                  ],
+              productlist.length != 0
+                  ? Container(
+                      color: Theme.of(context).primaryColor,
+                      child: GridView.builder(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 20),
+                          itemCount: productlist.length,
+                          shrinkWrap: true,
+                          physics: ScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            mainAxisSpacing: 18,
+                            crossAxisSpacing: 16,
+                            crossAxisCount: 2,
+                            childAspectRatio:
+                                MediaQuery.of(context).size.width /
+                                    (MediaQuery.of(context).size.height - 200),
+                          ),
+                          itemBuilder: (context, index) {
+                            return Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  color: Colors.white,
                                 ),
-                                ButtonTheme(
-                                    minWidth: 200.0,
-                                    height: 28.0,
-                                    buttonColor: Theme.of(context).primaryColor,
-                                    child: RaisedButton(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(15.0),
-                                        ),
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 12, vertical: 12),
+                                child: Stack(children: <Widget>[
+                                  Column(children: <Widget>[
+                                    Expanded(
+                                        child: Container(
+                                            decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                image: DecorationImage(
+                                                    fit: BoxFit.cover,
+                                                    image: NetworkImage(
+                                                        productlist[index]
+                                                            .image
+                                                            .url,
+                                                        scale: 20.0))))),
+                                    Text(productlist[index].name),
+                                    Padding(
+                                        padding:
+                                            EdgeInsets.symmetric(vertical: 7),
                                         child: Text(
-                                          "REQUEST A CALLBACK",
-                                          style: TextStyle(
-                                              color: Colors.white, fontSize: 8),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.of(context).push(
-                                              MaterialPageRoute(
-                                                  builder: (context) =>
-                                                      ProductDetail()));
-                                        }))
-                              ]),
-                              Positioned(
-                                top: 0,
-                                right: 0,
-                                child: Image.asset(
-                                  "assets/images/product/Bell_Icon.png",
-                                  height: 12,
-                                ),
-                              ),
-                            ]));
-                      }))
+                                          productlist[index].name,
+                                          style: TextStyle(fontSize: 12),
+                                        )),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceAround,
+                                      children: <Widget>[
+                                        Text("\u20B9" + '1,54,748',
+                                            style: TextStyle(
+                                              color: Theme.of(context)
+                                                  .primaryColor,
+                                              fontWeight: FontWeight.bold,
+                                            )),
+                                        Text("\u20B9" + '1,54,748',
+                                            style: TextStyle(
+                                                color: Colors.grey,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 10)),
+                                      ],
+                                    ),
+                                    ButtonTheme(
+                                        minWidth: 200.0,
+                                        height: 28.0,
+                                        buttonColor:
+                                            Theme.of(context).primaryColor,
+                                        child: RaisedButton(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(15.0),
+                                            ),
+                                            child: Text(
+                                              "REQUEST A CALLBACK",
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 8),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          ProductDetail()));
+                                            }))
+                                  ]),
+                                  Positioned(
+                                    top: 0,
+                                    right: 0,
+                                    child: Image.asset(
+                                      "assets/images/product/Bell_Icon.png",
+                                      height: 12,
+                                    ),
+                                  ),
+                                ]));
+                          }))
+                  : Center(
+                      child: Container(
+                        margin: EdgeInsets.only(top: 30),
+                        child: Text(
+                          "No Products available",
+                          style: TextStyle(fontSize: 18),
+                        ),
+                      ),
+                    )
             ],
           ),
           Positioned(

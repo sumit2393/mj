@@ -1,10 +1,15 @@
+import 'dart:convert';
 import 'dart:ui';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'login.dart';
+//import 'package:flutter_app_mbj/Models/SignUpModel.dart';
+import 'package:flutter_app_mbj/Provider/httpservices.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
-
+import 'package:http/http.dart' as http;
 
 class Signup extends StatefulWidget {
   @override
@@ -13,27 +18,85 @@ class Signup extends StatefulWidget {
 
 class _SignupState extends State<Signup> {
   String _date = "Date Of Birth";
-  String _anniversary="Anniversary";
-  String email, password, name, number;
+  String _anniversary = "Anniversary";
+  String email, name, number, dob, anniversary_date;
+  final _key = new GlobalKey<FormState>();
+  bool _secureText = true;
+
+  TextEditingController _dobController = new TextEditingController();
+  TextEditingController _anniversaryController = new TextEditingController();
+
+  showHide() {
+    setState(() {
+      _secureText = !_secureText;
+    });
+  }
 
   @override
   void initState() {
-   super.initState();
-    // TODO: implement initState
+    super.initState();
     email = "";
-    password = "";
     name = "";
+    dob = "";
     number = "";
-    _date="Date Of Birth";
+    anniversary_date = "";
+  }
 
-    _anniversary="Anniversary Date";
+  save() async {
+    Map<dynamic, dynamic> rawBody = {
+      "name": name,
+      "email": email,
+      "dob": dob,
+      "phone": number,
+      "anniversary_date": anniversary_date,
+    };
+
+    final response =
+        await http.post("http://greenergy.me/api/auth/sign-up", body: rawBody);
+
+    var data = jsonDecode(response.body);
+    print(data.toString());
+
+    if (data["status"] == 'success') {
+      String message = data['data']['message'];
+//      setState(() {
+//        Navigator.pop(context);
+//      });
+//      registerToast(message);
+
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Container(
+              height: 200,
+              child: SimpleDialog(
+                children: <Widget>[RaisedButton()],
+                title: Text(message),
+              ),
+            );
+          });
+    } else {
+      List<dynamic> errors = data["errors"];
+
+      errors.forEach((element) {
+        registerToast(element["errorMessage"]);
+      });
+    }
+  }
+
+  registerToast(String toast) {
+    return Fluttertoast.showToast(
+        msg: toast,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white);
   }
 
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
     double screenheight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
@@ -79,7 +142,6 @@ class _SignupState extends State<Signup> {
                   height: 50,
                   margin: EdgeInsets.only(top: 20, right: 20, left: 20),
                   child: TextField(
-
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
@@ -151,16 +213,16 @@ class _SignupState extends State<Signup> {
                   ),
                 ),
                 Container(
-                  height: 50,
+                  height: 70,
                   margin: EdgeInsets.only(top: 20, right: 20, left: 20),
                   child: TextField(
-
+                    keyboardType: TextInputType.number,
+                    maxLength: 10,
                     style: TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
                     cursorColor: Colors.white,
-                    obscureText: true,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.all(15),
@@ -183,135 +245,129 @@ class _SignupState extends State<Signup> {
                     ),
                     onChanged: (input) {
                       setState(() {
-
+                        number = input;
                       });
                     },
                   ),
                 ),
-               
                 Container(
                   height: 50,
-                  margin: EdgeInsets.only(top: 20, right: 20, left: 20),
-                  child:RaisedButton(
-                    shape: RoundedRectangleBorder(
-
-                        borderRadius: BorderRadius.circular(15.0)),
-                    elevation: 4.0,
-                    onPressed: () {
-
-                      DatePicker.showDatePicker(context,
-                          theme: DatePickerTheme(
-                            containerHeight: 250.0,
-                          ),
-                          showTitleActions: true,
-                          minTime: DateTime(1950, 1, 1),
-                          maxTime: DateTime(2030, 12, 31), onConfirm: (date) {
-                            print('confirm $date');
-                            _date = '${date.year} - ${date.month} - ${date.day}';
-                            setState(() {});
-                          }, currentTime: DateTime.now(), locale: LocaleType.en);
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 50.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.date_range,
-                                      size: 22.0,
-                                      color: Color(0xFF670e1e),
-                                    ),
-                                    Text(
-                                      " $_date",
-                                      style: TextStyle(
-                                          color: Color(0xFF670e1e),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18.0),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          Text(
-                            "  Change",
-                            style: TextStyle(
-                                color: Color(0xFF670e1e),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0),
-                          ),
-                        ],
+                  margin: EdgeInsets.only(top: 10, right: 20, left: 20),
+                  child: TextField(
+                    controller: _dobController,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(15),
+                      filled: true,
+                      fillColor: Color.fromRGBO(140, 0, 0, 0.2),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      hintText: 'Date Of Birth',
+                      hintStyle: TextStyle(color: Colors.white, fontSize: 20),
+                      prefixIcon: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white,
                       ),
                     ),
-                    color: Colors.white,
+                    onTap: () {
+                      DatePicker.showDatePicker(
+                        context,
+                        theme: DatePickerTheme(
+                          containerHeight: 250.0,
+                        ),
+                        showTitleActions: true,
+                        minTime: DateTime(1950, 1, 1),
+                        maxTime: DateTime(2030, 12, 31),
+                        onConfirm: (date) {
+                          print('confirm $date');
+                          var date1 = date.toString();
+                          var date2 = date1.split(" ");
+                          print(date2);
+                          setState(() {
+                            dob = date2[0].toString();
+                            _dobController.text = date2[0].toString();
+                          });
+                          _date = '${date.year} - ${date.month} - ${date.day}';
+                        },
+                      );
+                    },
+                    onChanged: (input) {
+                      setState(() {
+                        dob = input;
+                      });
+                    },
                   ),
                 ),
                 Container(
                   height: 50,
                   margin: EdgeInsets.only(top: 20, right: 20, left: 20),
-                  child:RaisedButton(
-                    shape: RoundedRectangleBorder(
-
-                        borderRadius: BorderRadius.circular(15.0)),
-                    elevation: 4.0,
-                    onPressed: () {
-                      DatePicker.showDatePicker(context,
-                          theme: DatePickerTheme(
-                            containerHeight: 210.0,
-                          ),
-                          showTitleActions: true,
-                          minTime: DateTime(2000, 1, 1),
-                          maxTime: DateTime(2022, 12, 31), onConfirm: (date) {
-                            print('confirm $date');
-                            _anniversary = '${date.year} - ${date.month} - ${date.day}';
-                            setState(() {});
-                          }, currentTime: DateTime.now(), locale: LocaleType.en);
-                    },
-                    child: Container(
-                      alignment: Alignment.center,
-                      height: 50.0,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Row(
-                            children: <Widget>[
-                              Container(
-                                child: Row(
-                                  children: <Widget>[
-                                    Icon(
-                                      Icons.date_range,
-                                      size: 22.0,
-                                      color: Color(0xFF670e1e),
-                                    ),
-                                    Text(
-                                      " $_anniversary",
-                                      style: TextStyle(
-                                          color: Color(0xFF670e1e),
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 18.0),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            ],
-                          ),
-                          Text(
-                            "  Change",
-                            style: TextStyle(
-                                color: Color(0xFF670e1e),
-                                fontWeight: FontWeight.bold,
-                                fontSize: 18.0),
-                          ),
-                        ],
+                  child: TextField(
+                    controller: _anniversaryController,
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold),
+                    cursorColor: Colors.white,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.all(15),
+                      filled: true,
+                      fillColor: Color.fromRGBO(140, 0, 0, 0.2),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(15.0)),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      hintText: 'Date Of Anniversary',
+                      hintStyle: TextStyle(color: Colors.white, fontSize: 20),
+                      prefixIcon: Icon(
+                        Icons.calendar_today,
+                        color: Colors.white,
                       ),
                     ),
-                    color: Colors.white,
+                    onTap: () {
+                      DatePicker.showDatePicker(
+                        context,
+                        theme: DatePickerTheme(
+                          containerHeight: 250.0,
+                        ),
+                        showTitleActions: true,
+                        minTime: DateTime(1950, 1, 1),
+                        maxTime: DateTime(2022, 12, 31),
+                        onConfirm: (date) {
+                          print('confirm $date');
+                          var ann_date1 = date.toString();
+                          var date2 = ann_date1.split(" ");
+                          print(date2);
+
+                          _date = '${date.year} - ${date.month} - ${date.day}';
+                          setState(() {
+                            anniversary_date = date2[0].toString();
+                            _anniversaryController.text = date2[0].toString();
+                          });
+                        },
+                      );
+                    },
+                    keyboardType: null,
+                    onChanged: (input) {
+                      setState(() {
+                        anniversary_date = input;
+                      });
+                    },
                   ),
                 ),
                 Container(
@@ -326,18 +382,14 @@ class _SignupState extends State<Signup> {
                           side: BorderSide(color: Colors.white)),
                       padding: const EdgeInsets.all(0.0),
                       onPressed: () {
-                        Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (context) =>
-                                    Login()));
+                        save();
                       },
-                      child:
-                          const Text('Signup', style: TextStyle(fontSize: 20,color: Color(0xFF670e1e))),
-
+                      child: const Text('Signup',
+                          style: TextStyle(
+                              fontSize: 20, color: Color(0xFF670e1e))),
                     ),
                   ),
                 ),
-
               ],
             ),
           ),
