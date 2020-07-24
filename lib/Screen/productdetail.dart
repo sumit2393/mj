@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 
 class ProductDetail extends StatefulWidget {
+  final productdata;
+  ProductDetail({this.productdata});
   ProductDetailState createState() => ProductDetailState();
 }
 
 class ProductDetailState extends State<ProductDetail> {
+  @override
+  void initState() {
+    super.initState();
+    print(widget.productdata);
+  }
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(

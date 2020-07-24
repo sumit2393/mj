@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app_mbj/Models/categories.dart';
 import './productdetail.dart';
 import '../provider/httpservices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 class ProduclList extends StatefulWidget {
   final mdata;
@@ -13,14 +16,10 @@ class _ProduclListstate extends State<ProduclList> {
   PersistentBottomSheetController _controller;
   List categoriesname = [];
   List productlist = [];
-  // var productlist = [
-  //   {"image": "assets/images/Homepage/6.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/9.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/10.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/11.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/12.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/13.png", "name": "Fashion Necklace"},
-  // ];
+  int userid;
+  bool isWishlist = false;
+  int selectedIndex = 0;
+  String bartitle = 'All';
 
   List<dynamic> sortarray = [
     {
@@ -49,32 +48,99 @@ class _ProduclListstate extends State<ProduclList> {
   String dropdownstoneValue;
   String dropdownpriceValue;
   String dropdowntypeValue;
+  Subcategories allCate;
 
   @override
   void initState() {
     super.initState();
     print(widget.mdata.id);
-    getCategories(widget.mdata.id);
+    getUserid();
   }
 
-  getCategories(id) {
-    fetchCategories(id).then((value) => {
-          print(value),
-          print(value.allproducts),
-          setState(() {
-            // productlist = value.allproducts;
-            categoriesname = value.subcategories;
+  getUserid() async {
+    print("userid function called");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    userid = preferences.getInt("id");
+    print("userid" + userid.toString());
+    getCategories(widget.mdata.id, "yes");
+  }
+
+  getCategories(id, change) {
+    fetchCategories(id, userid).then((value) => {
+          //print(value),
+          //print(value.allproducts),
+          allCate = new Subcategories.fromJson({
+            "id": 10,
+            "mainCategoryId": 1,
+            "imagePath": "",
+            "name": "All",
+            "createdAt": "",
+            "updatedAt": ""
           }),
-          print(categoriesname[0].name),
+          value.subcategories.insert(0, allCate),
+          print(value.allproducts[0].addedToWishList),
+          if (change == "yes")
+            {
+              setState(() {
+                productlist = value.allproducts;
+                categoriesname = value.subcategories;
+              }),
+            }
+          else
+            {
+              setState(() {
+                productlist = value.allproducts;
+              }),
+            }
         });
   }
 
-  getProductList(id) {
+  getProductList(id, index, name) {
     print(id);
-    fetchProductlist(id).then((value) => setState(() {
-          productlist = value.getProducts();
-          print(productlist);
-        }));
+    setState(() {
+      selectedIndex = index;
+      bartitle = name;
+    });
+    if (name == "All") {
+      getCategories(widget.mdata.id, "no");
+    } else {
+      fetchProductlist(id, userid).then((value) => setState(() {
+            productlist = value.getProducts();
+            print(productlist);
+          }));
+    }
+  }
+
+  addToWishlist(productid, isindex) {
+    addWish(userid, productid).then((value) => {
+          print(value),
+          if (value["status"] == "success")
+            {
+              setState(() {
+                productlist[isindex].addedToWishList = true;
+              })
+            }
+          else
+            {}
+        });
+  }
+
+  requestCall(productid) {
+    requestCallback(userid, productid).then((value) => {
+          if (value["status"] == "success")
+            {registerToast(value["data"]["message"])}
+          else
+            {registerToast("Something went wrong")}
+        });
+  }
+
+  registerToast(String toast) {
+    return Fluttertoast.showToast(
+        msg: toast,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF670e1e),
+        textColor: Colors.white);
   }
 
   openSort() async {
@@ -262,7 +328,6 @@ class _ProduclListstate extends State<ProduclList> {
   }
 
   Widget build(BuildContext context) {
-    print("build ");
     return Scaffold(
         key: scaffoldState,
         body: Stack(children: <Widget>[
@@ -303,16 +368,13 @@ class _ProduclListstate extends State<ProduclList> {
                               color: Colors.white,
                             ),
                             label: Text(
-                              "Bracelets",
+                              bartitle,
                               style: TextStyle(color: Colors.white),
                             ),
                             onPressed: () {
                               Navigator.pop(context);
                             },
                           )
-
-                          // Image.asset('assets/images/home/Bell_Icon.png',
-                          //     height: 12)
                         ],
                       )),
                   Positioned(
@@ -336,11 +398,15 @@ class _ProduclListstate extends State<ProduclList> {
                             itemBuilder: (context, index) {
                               return GestureDetector(
                                 onTap: () {
-                                  getProductList(categoriesname[index].id);
+                                  getProductList(categoriesname[index].id,
+                                      index, categoriesname[index].name);
                                 },
                                 child: Text(
                                   categoriesname[index].name,
-                                  style: TextStyle(color: Colors.white),
+                                  style: TextStyle(
+                                      color: (index == selectedIndex)
+                                          ? Colors.yellow
+                                          : Colors.white),
                                 ),
                               );
                             })),
@@ -417,13 +483,21 @@ class _ProduclListstate extends State<ProduclList> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceAround,
                                       children: <Widget>[
-                                        Text("\u20B9" + '1,54,748',
+                                        Text(
+                                            "\u20B9" +
+                                                productlist[index]
+                                                    .tagPrice
+                                                    .toString(),
                                             style: TextStyle(
                                               color: Theme.of(context)
                                                   .primaryColor,
                                               fontWeight: FontWeight.bold,
                                             )),
-                                        Text("\u20B9" + '1,54,748',
+                                        Text(
+                                            "\u20B9" +
+                                                productlist[index]
+                                                    .price
+                                                    .toString(),
                                             style: TextStyle(
                                                 color: Colors.grey,
                                                 fontWeight: FontWeight.w500,
@@ -447,20 +521,25 @@ class _ProduclListstate extends State<ProduclList> {
                                                   fontSize: 8),
                                             ),
                                             onPressed: () {
-                                              Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                      builder: (context) =>
-                                                          ProductDetail()));
+                                              requestCall(
+                                                  productlist[index].id);
                                             }))
                                   ]),
                                   Positioned(
-                                    top: 0,
-                                    right: 0,
-                                    child: Image.asset(
-                                      "assets/images/product/Bell_Icon.png",
-                                      height: 12,
-                                    ),
-                                  ),
+                                      top: 0,
+                                      right: 0,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          addToWishlist(
+                                              productlist[index].id, index);
+                                        },
+                                        child: Icon(Icons.favorite,
+                                            size: 16,
+                                            color: productlist[index]
+                                                    .addedToWishList
+                                                ? Colors.red
+                                                : Colors.grey[500]),
+                                      )),
                                 ]));
                           }))
                   : Center(

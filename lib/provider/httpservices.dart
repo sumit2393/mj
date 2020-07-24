@@ -20,6 +20,8 @@ const String categories = "categories/";
 const String productlist = "categories/";
 const String wishlist = "get-all-wishlist-products/";
 const String requestcall = "send-call-request";
+const String addwishlist = "add-product-to-wishlist";
+const String removewishlist = mainUrl + "remove-product-from-wishlist";
 
 //// *********  Fetch main categories  **********/////
 
@@ -60,8 +62,14 @@ Future<ProductList> fetchFeaturedProducts() async {
 
 ///// @@@@@  categories list @@@@@@  ////
 
-Future<Categories> fetchCategories(id) async {
-  final response = await http.get(mainUrl + categories + id.toString());
+Future<Categories> fetchCategories(id, userid) async {
+  print("userd" + userid.toString());
+  print("id" + id.toString());
+  print("category data");
+
+  String url = mainUrl + categories + "$id/$userid";
+  print(url);
+  final response = await http.get(url);
   print(response.statusCode);
   print(response.body);
   if (response.statusCode == 200) {
@@ -86,9 +94,11 @@ Future<ProductDetails> fetchProductdetails(id) async {
 
 /////  @@@@@  productlist  @@@@@@@@@ ///
 
-Future<ProductList> fetchProductlist(id) async {
-  final response =
-      await http.get(mainUrl + productlist + id.toString() + "/products");
+Future<ProductList> fetchProductlist(id, userid) async {
+  print("userd" + userid.toString());
+  print("id" + id.toString());
+  final response = await http.get(
+      mainUrl + productlist + id.toString() + "/products/" + userid.toString());
   print(response.statusCode);
   print(response.body);
   if (response.statusCode == 200) {
@@ -114,6 +124,34 @@ Future requestCallback(userid, productid) async {
   print("userid" + userid.toString());
   final response = await http.post(mainUrl + requestcall,
       body: {"user_id": userid.toString(), "product_id": productid.toString()});
+  print(response.statusCode);
+  print(response.body);
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load Categories');
+  }
+}
+
+Future addWish(userid, productid) async {
+  print("Productid" + productid.toString());
+  print("userid" + userid.toString());
+  final response = await http.post(mainUrl + addwishlist,
+      body: {"user_id": userid.toString(), "product_id": productid.toString()});
+  print(response.statusCode);
+  print(response.body);
+  if (response.statusCode == 200) {
+    return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load Categories');
+  }
+}
+
+Future removeWish(userid, productid) async {
+  print("Productid" + productid.toString());
+  print("userid" + userid.toString());
+  final response = await http.delete(
+      removewishlist + "?user_id=" + userid + "&product_id=" + productid);
   print(response.statusCode);
   print(response.body);
   if (response.statusCode == 200) {

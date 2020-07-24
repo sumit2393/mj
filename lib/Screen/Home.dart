@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import './product.dart';
+import './productdetail.dart';
 import '../provider/httpservices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -257,15 +258,22 @@ class _HomeState extends State<Home> {
                           color: Theme.of(context).primaryColor,
                           child: Column(children: <Widget>[
                             Expanded(
-                                child: Container(
-                                    margin: EdgeInsets.only(top: 5),
-                                    decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                            fit: BoxFit.cover,
-                                            image: NetworkImage(
-                                                categorieslist[index]
-                                                    .image
-                                                    .url))))),
+                                child: GestureDetector(
+                              onTap: () {
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (context) => ProductDetail(
+                                        productdata: categorieslist[index])));
+                              },
+                              child: Container(
+                                  margin: EdgeInsets.only(top: 5),
+                                  decoration: BoxDecoration(
+                                      image: DecorationImage(
+                                          fit: BoxFit.cover,
+                                          image: NetworkImage(
+                                              categorieslist[index]
+                                                  .image
+                                                  .url)))),
+                            )),
                             Padding(
                                 padding: EdgeInsets.only(top: 12, bottom: 2),
                                 child: Text(
@@ -287,10 +295,6 @@ class _HomeState extends State<Home> {
                                     ),
                                     onPressed: () {
                                       makeCall(categorieslist[index].id);
-                                      // Navigator.of(context).push(
-                                      //     MaterialPageRoute(
-                                      //         builder: (context) =>
-                                      //             ProduclList()));
                                     }))
                           ]),
                         );

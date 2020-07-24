@@ -113,7 +113,7 @@ class Product {
   Null publishedAt;
   String createdAt;
   String updatedAt;
-
+  Image image;
   Product(
       {this.id,
       this.name,
@@ -140,7 +140,8 @@ class Product {
       this.polkiPieces,
       this.publishedAt,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.image});
 
   Product.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -169,6 +170,7 @@ class Product {
     publishedAt = json['published_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    image = json['image'] != null ? new Image.fromJson(json['image']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -200,5 +202,31 @@ class Product {
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;
+  }
+}
+
+class Image {
+  int id;
+  String url;
+  int imageableId;
+  String imageableType;
+  String createdAt;
+  String updatedAt;
+
+  Image(
+      {this.id,
+      this.url,
+      this.imageableId,
+      this.imageableType,
+      this.createdAt,
+      this.updatedAt});
+
+  Image.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    url = json['url'];
+    imageableId = json['imageable_id'];
+    imageableType = json['imageable_type'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
   }
 }

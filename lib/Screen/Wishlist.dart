@@ -53,8 +53,7 @@ class _WishlistState extends State<Wishlist> {
       !loading
           ? totalitem == 0
               ? Center(child: Text("Wishlist is Empty"))
-              : ProductList(
-                  wishlist, Icon(Icons.close, color: Colors.grey), userid)
+              : ProductList(wishlist, userid)
           : Center(
               child: CircularProgressIndicator(
                 valueColor: new AlwaysStoppedAnimation<Color>(Colors.white),

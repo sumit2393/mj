@@ -42,6 +42,7 @@ class PList {
   String createdAt;
   String updatedAt;
   Image image;
+  bool addedToWishList;
   List<Thumbnails> thumbnails;
 
   PList(
@@ -72,6 +73,7 @@ class PList {
       this.createdAt,
       this.updatedAt,
       this.image,
+      this.addedToWishList,
       this.thumbnails});
 
   factory PList.fromJson(Map<String, dynamic> json) {
@@ -112,6 +114,7 @@ class PList {
         createdAt: json['created_at'],
         updatedAt: json['updated_at'],
         image: image,
+        addedToWishList: json['addedToWishList'],
         thumbnails: thumbnails);
   }
 }
