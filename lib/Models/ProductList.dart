@@ -22,21 +22,21 @@ class PList {
   int categoryId;
   String primarySku;
   String secondarySku;
-  int grossWeight;
+  num grossWeight; // int
   String designCode;
   int netWeight;
   int tagPrice;
   int pieces;
   String articleNecklace;
-  double pearlWeight;
+  num pearlWeight; //double
   int kundanStones;
   int carat;
   int diamondSet;
   int diamondWeight;
   int diamondPieces;
-  double colorStoneWeight;
+  num colorStoneWeight; //double
   String colorStonePieces;
-  double polkiWeight;
+  num polkiWeight; //double
   String polkiPieces;
   Null publishedAt;
   String createdAt;

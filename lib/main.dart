@@ -19,6 +19,6 @@ class MyApp extends StatelessWidget {
             buttonTheme: ButtonThemeData(
                 buttonColor: Color(0xFF670e1e),
                 textTheme: ButtonTextTheme.primary)),
-        home: LandingScreen());
+        home: Initial());
   }
 }

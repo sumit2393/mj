@@ -98,7 +98,7 @@ class _ProductListState extends State<ProductList> {
                                             .product
                                             .image
                                             .url))))),
-                        Text(widget.productlist[index].product.name),
+                        // Text(widget.productlist[index].product.name),
                         Padding(
                             padding: EdgeInsets.symmetric(vertical: 7),
                             child: Text(

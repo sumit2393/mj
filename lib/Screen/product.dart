@@ -4,6 +4,7 @@ import './productdetail.dart';
 import '../provider/httpservices.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import './searchproduct.dart';
 
 class ProduclList extends StatefulWidget {
   final mdata;
@@ -66,33 +67,38 @@ class _ProduclListstate extends State<ProduclList> {
   }
 
   getCategories(id, change) {
-    fetchCategories(id, userid).then((value) => {
-          //print(value),
-          //print(value.allproducts),
-          allCate = new Subcategories.fromJson({
-            "id": 10,
-            "mainCategoryId": 1,
-            "imagePath": "",
-            "name": "All",
-            "createdAt": "",
-            "updatedAt": ""
-          }),
-          value.subcategories.insert(0, allCate),
-          print(value.allproducts[0].addedToWishList),
-          if (change == "yes")
-            {
-              setState(() {
-                productlist = value.allproducts;
-                categoriesname = value.subcategories;
+    fetchCategories(id, userid)
+        .then((value) => {
+              print("getdata======>>>>>>"),
+              print(value),
+              //print(value.allproducts),
+              allCate = new Subcategories.fromJson({
+                "id": 10,
+                "mainCategoryId": 1,
+                "imagePath": "",
+                "name": "All",
+                "createdAt": "",
+                "updatedAt": ""
               }),
-            }
-          else
-            {
-              setState(() {
-                productlist = value.allproducts;
-              }),
-            }
-        });
+              value.subcategories.insert(0, allCate),
+              print(value.allproducts[0].addedToWishList),
+              if (change == "yes")
+                {
+                  setState(() {
+                    productlist = value.allproducts;
+                    categoriesname = value.subcategories;
+                    print("length");
+                    print(categoriesname.length);
+                  }),
+                }
+              else
+                {
+                  setState(() {
+                    productlist = value.allproducts;
+                  }),
+                }
+            })
+        .catchError((e) => {print(e)});
   }
 
   getProductList(id, index, name) {
@@ -111,18 +117,40 @@ class _ProduclListstate extends State<ProduclList> {
     }
   }
 
-  addToWishlist(productid, isindex) {
-    addWish(userid, productid).then((value) => {
-          print(value),
-          if (value["status"] == "success")
-            {
-              setState(() {
-                productlist[isindex].addedToWishList = true;
-              })
-            }
-          else
-            {}
-        });
+  addToWishlist(productid, isindex, isadded) {
+    print("called");
+    print(isadded);
+    if (!isadded) {
+      addWish(userid, productid).then((value) => {
+            print(value),
+            if (value["status"] == "success")
+              {
+                registerToast(value["data"]["message"]),
+                setState(() {
+                  productlist[isindex].addedToWishList = true;
+                })
+              }
+            else
+              {registerToast("Something went wrong Please try again")}
+          });
+    } else {
+      print("in else part");
+
+      removeWish(userid.toString(), productid.toString()).then((value) => {
+            print(value),
+            if (value["status"] == "success")
+              {
+                setState(() {
+                  registerToast(value["data"]["message"]);
+                  setState(() {
+                    productlist[isindex].addedToWishList = false;
+                  });
+                })
+              }
+            else
+              {registerToast("Something went wrong")}
+          });
+    }
   }
 
   requestCall(productid) {
@@ -341,7 +369,7 @@ class _ProduclListstate extends State<ProduclList> {
                 foregroundDecoration: BoxDecoration(
                     image: DecorationImage(
                         image:
-                            NetworkImage(widget.mdata.imageUrl, scale: 20.0))),
+                            NetworkImage(widget.mdata.imageUrl, scale: 30.0))),
                 decoration: BoxDecoration(
                     image: DecorationImage(
                   fit: BoxFit.cover,
@@ -377,6 +405,23 @@ class _ProduclListstate extends State<ProduclList> {
                           )
                         ],
                       )),
+                  // Positioned(
+                  //     right: 0,
+                  //     top: 30,
+                  //     child: Row(
+                  //       children: <Widget>[
+                  //         GestureDetector(
+                  //           onTap: () {
+                  //             Navigator.of(context).push(MaterialPageRoute(
+                  //                 builder: (context) => SearchProduct()));
+                  //           },
+                  //           child: Icon(
+                  //             Icons.search,
+                  //             color: Colors.white,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     )),
                   Positioned(
                     left: 0.0,
                     bottom: 0.0,
@@ -461,17 +506,29 @@ class _ProduclListstate extends State<ProduclList> {
                                 child: Stack(children: <Widget>[
                                   Column(children: <Widget>[
                                     Expanded(
-                                        child: Container(
-                                            decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                image: DecorationImage(
-                                                    fit: BoxFit.cover,
-                                                    image: NetworkImage(
-                                                        productlist[index]
-                                                            .image
-                                                            .url,
-                                                        scale: 20.0))))),
-                                    Text(productlist[index].name),
+                                        child: GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    ProductDetail(
+                                                        productdata:
+                                                            productlist[
+                                                                index])));
+                                      },
+                                      child: Container(
+                                          margin: EdgeInsets.only(top: 20),
+                                          decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              image: DecorationImage(
+                                                  fit: BoxFit.cover,
+                                                  image: NetworkImage(
+                                                      productlist[index]
+                                                          .image
+                                                          .url,
+                                                      scale: 30.0)))),
+                                    )),
+                                    // Text(productlist[index].name),
                                     Padding(
                                         padding:
                                             EdgeInsets.symmetric(vertical: 7),
@@ -531,7 +588,10 @@ class _ProduclListstate extends State<ProduclList> {
                                       child: GestureDetector(
                                         onTap: () {
                                           addToWishlist(
-                                              productlist[index].id, index);
+                                              productlist[index].id,
+                                              index,
+                                              productlist[index]
+                                                  .addedToWishList);
                                         },
                                         child: Icon(Icons.favorite,
                                             size: 16,

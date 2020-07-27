@@ -13,14 +13,6 @@ class _WishlistState extends State<Wishlist> {
   bool loading = false;
   int totalitem;
   List wishlist = [];
-  // var wishlist = [
-  //   {"image": "assets/images/Homepage/6.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/9.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/10.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/11.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/12.png", "name": "Fashion Necklace"},
-  //   {"image": "assets/images/Homepage/13.png", "name": "Fashion Necklace"},
-  // ];
 
   @override
   void initState() {

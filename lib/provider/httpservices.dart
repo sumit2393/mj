@@ -8,6 +8,7 @@ import '../Models/Productdetails.dart';
 import '../Models/categories.dart';
 import '../Models/ProductList.dart';
 import '../Models/wishlist.dart';
+import '../Models/searchmodel.dart';
 
 const String mainUrl = "http://greenergy.me/api/";
 const String mainCategories =
@@ -22,6 +23,7 @@ const String wishlist = "get-all-wishlist-products/";
 const String requestcall = "send-call-request";
 const String addwishlist = "add-product-to-wishlist";
 const String removewishlist = mainUrl + "remove-product-from-wishlist";
+const String searchproduct = mainUrl + "search-product?";
 
 //// *********  Fetch main categories  **********/////
 
@@ -156,6 +158,20 @@ Future removeWish(userid, productid) async {
   print(response.body);
   if (response.statusCode == 200) {
     return json.decode(response.body);
+  } else {
+    throw Exception('Failed to load Categories');
+  }
+}
+
+Future<Searchmodel> search(product, userid) async {
+  final response = await http.get(searchproduct +
+      "search_query=" +
+      product +
+      "&userId=" +
+      userid.toString());
+
+  if (response.statusCode == 200) {
+    return Searchmodel.fromJson(json.decode(response.body));
   } else {
     throw Exception('Failed to load Categories');
   }

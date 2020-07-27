@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 import './Home.dart';
-import './product.dart';
-import './productdetail.dart';
+
 import './Wishlist.dart';
 import './Notification.dart';
 import './Profile_Screen.dart';
+import './searchproduct.dart';
 
 List<dynamic> tabsdata = [
-  {"icon": "assets/images/home/Home_ICon.png", "page": Home(), "title": ""},
   {
-    "icon": "assets/images/home/Recent_ICon.png",
+    "icon": "assets/images/home/Home_ICon.png",
+    "page": Home(),
+    "title": Image.asset(
+      "assets/images/home/Home_Page_Logo_Icon.png",
+      height: 40,
+      width: 60,
+      //fit: BoxFit.cover,
+    )
+  },
+  {
+    "icon": "assets/images/home/wish_Icon.png",
     "page": Wishlist(),
-    "title": "Wishlist"
+    "title": Text("Wishlist")
   },
   {
     "icon": "assets/images/home/Offer_ICon.png",
     "page": Wishlist(),
-    "title": "offer"
+    "title": Text("Wishlist")
   },
   // {"icon":"assets/images/home/Gold_icon.png"},
   // {"icon":"assets/images/home/Cart_ICon.png"}
@@ -52,7 +61,7 @@ class _InitialState extends State<Initial> {
         preferredSize: Size.fromHeight(40.0),
         child: AppBar(
           centerTitle: true,
-          title: Text(tabsdata[_selectedIndex]["title"]),
+          title: tabsdata.elementAt(_selectedIndex)["title"],
           leading: Padding(
             padding: EdgeInsets.all(10),
             child: GestureDetector(
@@ -65,19 +74,24 @@ class _InitialState extends State<Initial> {
           ),
           actions: <Widget>[
             GestureDetector(
-                onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => Notificationlist())),
-                child: Image.asset(
-                  "assets/images/home/Bell_Icon.png",
-                  height: 14,
-                  width: 14,
-                )),
+              onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => Notificationlist())),
+              child: Image.asset(
+                "assets/images/home/Bell_Icon.png",
+                height: 14,
+                width: 14,
+              ),
+            ),
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: Image.asset(
-                  "assets/images/product/Search_Icon.png",
-                  height: 16,
-                  width: 16,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => SearchProduct())),
+                  child: Image.asset(
+                    "assets/images/product/Search_Icon.png",
+                    height: 16,
+                    width: 16,
+                  ),
                 ))
           ],
         ),
@@ -95,10 +109,10 @@ class _InitialState extends State<Initial> {
                 buildListTile(
                     context, {"name": "Profile", "goto": Profile_Screen()}),
                 Divider(),
-                buildListTile(context, {"name": "Collection", "goto": ""}),
-                Divider(),
-                buildListTile(context, {"name": "Products", "goto": ""}),
-                Divider(),
+                // buildListTile(context, {"name": "Collection", "goto": ""}),
+                // Divider(),
+                // buildListTile(context, {"name": "Products", "goto": ""}),
+                // Divider(),
                 buildListTile(context, {"name": "About", "goto": ""}),
                 Divider(),
                 buildListTile(context, {"name": "Contact us", "goto": ""}),

@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import '../provider/httpservices.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductDetail extends StatefulWidget {
   final productdata;
@@ -7,10 +11,73 @@ class ProductDetail extends StatefulWidget {
 }
 
 class ProductDetailState extends State<ProductDetail> {
+  int userid;
+
   @override
   void initState() {
     super.initState();
     print(widget.productdata);
+    getUserid();
+  }
+
+  getUserid() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    userid = preferences.getInt("id");
+    print("userid" + userid.toString());
+  }
+
+  requestCall() {
+    requestCallback(widget.productdata.id, userid).then((value) => {
+          if (value["status"] == "success")
+            {registerToast(value["data"]["message"])}
+          else
+            {registerToast("Something went wrong")}
+        });
+  }
+
+  addToWishlist(productid, isadded) {
+    print("called");
+    print(isadded);
+    if (!isadded) {
+      addWish(userid, productid).then((value) => {
+            print(value),
+            if (value["status"] == "success")
+              {
+                registerToast(value["data"]["message"]),
+                setState(() {
+                  widget.productdata.addedToWishList = true;
+                })
+              }
+            else
+              {registerToast("Something went wrong Please try again")}
+          });
+    } else {
+      print("in else part");
+
+      removeWish(userid.toString(), productid.toString()).then((value) => {
+            print(value),
+            if (value["status"] == "success")
+              {
+                setState(() {
+                  registerToast(value["data"]["message"]);
+                  setState(() {
+                    widget.productdata.addedToWishList = false;
+                  });
+                })
+              }
+            else
+              {registerToast("Something went wrong")}
+          });
+    }
+  }
+
+  registerToast(String toast) {
+    return Fluttertoast.showToast(
+        msg: toast,
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Color(0xFF670e1e),
+        textColor: Colors.white);
   }
 
   Widget build(BuildContext context) {
@@ -19,15 +86,15 @@ class ProductDetailState extends State<ProductDetail> {
         preferredSize: Size.fromHeight(40.0),
         child: AppBar(
           actions: <Widget>[
-            Image.asset(
-              "assets/images/home/Bell_Icon.png",
-              height: 14,
-              width: 14,
-            ),
+            // Image.asset(
+            //   "assets/images/home/Bell_Icon.png",
+            //   height: 14,
+            //   width: 14,
+            // ),
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Image.asset(
-                  "assets/images/product/Search_Icon.png",
+                  "assets/images/home/Bell_Icon.png",
                   height: 16,
                   width: 16,
                 ))
@@ -48,40 +115,64 @@ class ProductDetailState extends State<ProductDetail> {
                     height: 300,
                     color: Colors.white,
                     child: Padding(
-                        padding: EdgeInsets.only(bottom: 60),
-                        child: Image.asset("assets/images/Homepage/13.png"))),
+                        padding: EdgeInsets.only(
+                            bottom: 70, left: 60, right: 60, top: 20),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.productdata.image.url,
+                        ))),
                 new Positioned(
                     bottom: 0,
                     left: 0,
                     right: 0,
                     child: Container(
+                        height: 120,
                         margin: EdgeInsets.symmetric(horizontal: 18),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: <Widget>[
-                            jewellerybox(),
-                            jewellerybox(),
-                            jewellerybox(),
-                          ],
-                        ))),
-                wishlist(context)
+                        child: ListView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            itemCount: widget.productdata.thumbnails.length,
+                            itemBuilder: (context, index) {
+                              return jewellerybox(
+                                  widget.productdata.thumbnails[index].url);
+                            })
+                        // Row(
+                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        //     children:
+                        //         widget.productdata.thumbnails.map<Widget>((e) {
+                        //       return Expanded(child: jewellerybox(e.url));
+                        //     }).toList())
+                        )),
+                Positioned(
+                    top: 16,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: () {
+                        addToWishlist(widget.productdata.id,
+                            widget.productdata.addedToWishList);
+                      },
+                      child: Icon(Icons.favorite,
+                          size: 16,
+                          color: widget.productdata.addedToWishList
+                              ? Colors.red
+                              : Colors.grey[500]),
+                    ))
               ]),
             ),
             Padding(
                 padding: EdgeInsets.symmetric(vertical: 35),
                 child: Text(
-                  "ATTRACT DUAL LIGHT NECKLACE",
+                  widget.productdata.name.toString(),
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w400),
                 )),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
               Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                Text("\u20B9" + '1,54,748',
+                Text("\u20B9" + widget.productdata.price.toString(),
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
                     )),
-                Text("\u20B9" + '1,54,748',
+                Text("\u20B9" + widget.productdata.tagPrice.toString(),
                     style: TextStyle(color: Colors.grey[400], fontSize: 12)),
               ]),
               SizedBox(
@@ -93,13 +184,12 @@ class ProductDetailState extends State<ProductDetail> {
                 SizedBox(
                   height: 8,
                 ),
-                Text("3 percent GST",
+                Text("",
                     style: TextStyle(color: Colors.grey[400], fontSize: 12)),
               ]),
             ]),
             Container(
                 margin: EdgeInsets.only(top: 35, bottom: 14),
-                // padding: EdgeInsets.symmetric(vertical: 12),
                 child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: <Widget>[
@@ -115,7 +205,7 @@ class ProductDetailState extends State<ProductDetail> {
                           height: 6,
                         ),
                         Text(
-                          "OUT",
+                          "",
                           style: TextStyle(fontSize: 8, color: Colors.black),
                         )
                       ]),
@@ -130,7 +220,7 @@ class ProductDetailState extends State<ProductDetail> {
                         SizedBox(
                           height: 6,
                         ),
-                        Text("NB3183",
+                        Text(widget.productdata.designCode.toString(),
                             style: TextStyle(fontSize: 8, color: Colors.black))
                       ]),
                       Column(children: [
@@ -144,7 +234,7 @@ class ProductDetailState extends State<ProductDetail> {
                         SizedBox(
                           height: 6,
                         ),
-                        Text("BRACELET",
+                        Text("",
                             style: TextStyle(fontSize: 8, color: Colors.black))
                       ])
                     ])),
@@ -152,7 +242,7 @@ class ProductDetailState extends State<ProductDetail> {
             Padding(
                 padding: EdgeInsets.symmetric(vertical: 22),
                 child: Text(
-                  "White gold tennis necklace with white diamonds and black enamel",
+                  "",
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.black, fontSize: 10),
                 )),
@@ -171,17 +261,18 @@ class ProductDetailState extends State<ProductDetail> {
                   children: <Widget>[
                     quantity({
                       "title": "MATERIALS",
-                      "value": "WHITE DIAMOND",
+                      "value": "",
                       "image": "assets/images/product/material.png"
                     }),
                     quantity({
                       "title": "DIAMOND",
-                      "value": "105 SIIJ | 1.575ct",
+                      "value":
+                          " | " + widget.productdata.carat.toString() + "ct",
                       "image": "assets/images/product/diamond.png"
                     }),
                     quantity({
                       "title": "PRODUCT WEIGHT",
-                      "value": "16.0 gram",
+                      "value": "",
                       "image": "assets/images/product/weighht.png"
                     }),
                   ],
@@ -198,20 +289,80 @@ class ProductDetailState extends State<ProductDetail> {
                 margin: EdgeInsets.symmetric(horizontal: 12, vertical: 16),
                 padding: EdgeInsets.all(12),
                 child: Column(children: <Widget>[
-                  rateWidget({"title": "DIAMOND SET", "amount": "00"}),
-                  rateWidget({"title": "ARTICLE - NECKLACE", "amount": "00"}),
-                  rateWidget({"title": "GROSS WEIGHT", "amount": "00"}),
-                  rateWidget({"title": "NET WEIGHT", "amount": "00"}),
-                  rateWidget({"title": "DIAMOND PIECES", "amount": "00"}),
-                  rateWidget({"title": "COLORSTONE WEIGHT", "amount": "00"}),
-                  rateWidget({"title": "COLORSTONE PIECES", "amount": "00"}),
-                  rateWidget({"title": "POLKI WEIGHT", "amount": "00"}),
-                  rateWidget({"title": "POLKI PIECES", "amount": "00"}),
-                  rateWidget({"title": "TAG PRICE", "amount": "00"}),
+                  rateWidget({
+                    "title": "DIAMOND SET",
+                    "amount": widget.productdata.diamondSet.toString()
+                  }),
+                  rateWidget({
+                    "title": "ARTICLE - NECKLACE",
+                    "amount": widget.productdata.articleNecklace.toString()
+                  }),
+                  rateWidget({
+                    "title": "GROSS WEIGHT",
+                    "amount": widget.productdata.grossWeight.toString()
+                  }),
+                  rateWidget({
+                    "title": "NET WEIGHT",
+                    "amount": widget.productdata.netWeight.toString()
+                  }),
+                  rateWidget({
+                    "title": "DIAMOND PIECES",
+                    "amount": widget.productdata.diamondPieces.toString()
+                  }),
+                  rateWidget({
+                    "title": "COLORSTONE WEIGHT",
+                    "amount": widget.productdata.colorStoneWeight.toString()
+                  }),
+                  rateWidget({
+                    "title": "COLORSTONE PIECES",
+                    "amount": widget.productdata.colorStonePieces.toString()
+                  }),
+                  rateWidget({
+                    "title": "POLKI WEIGHT",
+                    "amount": widget.productdata.polkiWeight.toString()
+                  }),
+                  rateWidget({
+                    "title": "POLKI PIECES",
+                    "amount": widget.productdata.polkiPieces.toString()
+                  }),
+                  rateWidget({
+                    "title": "TAG PRICE",
+                    "amount": widget.productdata.tagPrice.toString()
+                  }),
                 ]))
           ],
         ),
-        request(context),
+        Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: GestureDetector(
+              onTap: () {
+                requestCall();
+              },
+              child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 18),
+                  color: Theme.of(context).primaryColor,
+                  child: RichText(
+                    textAlign: TextAlign.center,
+                    text: TextSpan(
+                      style: TextStyle(
+                          fontWeight: FontWeight.w500, color: Colors.white),
+                      children: [
+                        WidgetSpan(
+                            child: Padding(
+                                padding: EdgeInsets.only(right: 8, bottom: 2),
+                                child: Icon(
+                                  Icons.phone,
+                                  color: Colors.white,
+                                  size: 14,
+                                ))),
+                        TextSpan(text: 'REQUEST A CALL BACK'),
+                      ],
+                    ),
+                  )),
+            ))
+        // request(context),
       ]),
     );
   }
@@ -231,7 +382,7 @@ Widget rateWidget(data) {
                 fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
           ),
           Text(
-            data["amount"],
+            data["amount"].toString(),
             style: TextStyle(
                 fontSize: 10, color: Colors.black, fontWeight: FontWeight.w500),
           ),
@@ -244,32 +395,37 @@ Widget request(context) {
       bottom: 0,
       left: 0,
       right: 0,
-      child: Container(
-          padding: EdgeInsets.symmetric(vertical: 18),
-          color: Theme.of(context).primaryColor,
-          child: RichText(
-            textAlign: TextAlign.center,
-            text: TextSpan(
-              style:
-                  TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
-              children: [
-                WidgetSpan(
-                    child: Padding(
-                        padding: EdgeInsets.only(right: 8, bottom: 2),
-                        child: Icon(
-                          Icons.phone,
-                          color: Colors.white,
-                          size: 14,
-                        ))),
-                TextSpan(text: 'REQUEST A CALL BACK'),
-              ],
-            ),
-          )));
+      child: GestureDetector(
+        onTap: () {
+          context.requestCall();
+        },
+        child: Container(
+            padding: EdgeInsets.symmetric(vertical: 18),
+            color: Theme.of(context).primaryColor,
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                style:
+                    TextStyle(fontWeight: FontWeight.w500, color: Colors.white),
+                children: [
+                  WidgetSpan(
+                      child: Padding(
+                          padding: EdgeInsets.only(right: 8, bottom: 2),
+                          child: Icon(
+                            Icons.phone,
+                            color: Colors.white,
+                            size: 14,
+                          ))),
+                  TextSpan(text: 'REQUEST A CALL BACK'),
+                ],
+              ),
+            )),
+      ));
 }
 
-Widget jewellerybox() {
+Widget jewellerybox(url) {
   return Container(
-      padding: EdgeInsets.all(2),
+      margin: EdgeInsets.all(8),
       decoration: BoxDecoration(color: Colors.white, boxShadow: [
         BoxShadow(
           color: Colors.grey.withOpacity(0.3),
@@ -278,9 +434,10 @@ Widget jewellerybox() {
           offset: Offset(0, 0), // changes position of shadow
         ),
       ]),
-      child: Image.asset(
-        "assets/images/Homepage/13.png",
+      child: CachedNetworkImage(
+        imageUrl: url,
         height: 110,
+        width: 100,
       ));
 }
 
@@ -294,11 +451,12 @@ Widget quantity(data) {
     Padding(
         padding: EdgeInsets.symmetric(vertical: 8),
         child: Text(
-          data["title"],
+          data["title"].toString(),
           style: TextStyle(
               color: Colors.black, fontSize: 10, fontWeight: FontWeight.w600),
         )),
-    Text(data["value"], style: TextStyle(color: Colors.black, fontSize: 8))
+    Text(data["value"].toString(),
+        style: TextStyle(color: Colors.black, fontSize: 8))
   ]));
 }
 
