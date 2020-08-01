@@ -15,7 +15,7 @@ const String mainCategories =
     "maincategories"; // to get the maincategories of homepage
 const String banners = "banners"; // get the banners of homepage slider
 const String featuredProducts =
-    "products-featured"; // get the featured products for homepage
+    "products-featured/"; // get the featured products for homepage
 const String productDetails = "products/";
 const String categories = "categories/";
 const String productlist = "categories/";
@@ -51,8 +51,9 @@ Future<BannerItem> fetchBanners() async {
   }
 }
 
-Future<ProductList> fetchFeaturedProducts() async {
-  final response = await http.get(mainUrl + featuredProducts);
+Future<ProductList> fetchFeaturedProducts(userid) async {
+  final response =
+      await http.get(mainUrl + featuredProducts + userid.toString());
   print(response.statusCode);
   print(response.body);
   if (response.statusCode == 200) {

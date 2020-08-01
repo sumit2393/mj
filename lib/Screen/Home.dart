@@ -48,8 +48,14 @@ class _HomeState extends State<Home> {
           carousellist = value.upcomingDesigns,
           newtrends = value.newTrends,
         });
+  }
 
-    fetchFeaturedProducts().then((value) => {
+  getUserid() async {
+    print("userid function called");
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    userid = preferences.getInt("id");
+    print("userid" + userid.toString());
+    fetchFeaturedProducts(userid).then((value) => {
           print("featured products"),
           print(value.productlist),
           setState(() {
@@ -58,13 +64,6 @@ class _HomeState extends State<Home> {
           }),
           value.productlist.map((e) => print("ewe" + e.name))
         });
-  }
-
-  getUserid() async {
-    print("userid function called");
-    SharedPreferences preferences = await SharedPreferences.getInstance();
-    userid = preferences.getInt("id");
-    print("userid" + userid.toString());
   }
 
   makeCall(productid) {

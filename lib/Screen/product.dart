@@ -70,7 +70,7 @@ class _ProduclListstate extends State<ProduclList> {
     fetchCategories(id, userid)
         .then((value) => {
               print("getdata======>>>>>>"),
-              print(value),
+              print(value.subcategories.length),
               //print(value.allproducts),
               allCate = new Subcategories.fromJson({
                 "id": 10,
@@ -81,9 +81,10 @@ class _ProduclListstate extends State<ProduclList> {
                 "updatedAt": ""
               }),
               value.subcategories.insert(0, allCate),
-              print(value.allproducts[0].addedToWishList),
+
               if (change == "yes")
                 {
+                  print("you are in if par"),
                   setState(() {
                     productlist = value.allproducts;
                     categoriesname = value.subcategories;
@@ -93,6 +94,7 @@ class _ProduclListstate extends State<ProduclList> {
                 }
               else
                 {
+                  print("you are in else par"),
                   setState(() {
                     productlist = value.allproducts;
                   }),

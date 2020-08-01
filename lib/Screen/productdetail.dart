@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import '../provider/httpservices.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductDetail extends StatefulWidget {
@@ -11,6 +12,7 @@ class ProductDetail extends StatefulWidget {
 }
 
 class ProductDetailState extends State<ProductDetail> {
+  final scaffoldState = GlobalKey<ScaffoldState>();
   int userid;
 
   @override
@@ -80,17 +82,31 @@ class ProductDetailState extends State<ProductDetail> {
         textColor: Colors.white);
   }
 
+  zoomImage(data) {
+    scaffoldState.currentState.showBottomSheet(
+      (BuildContext context) {
+        return Center(
+            child: Container(
+                height: 400,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: PhotoView(
+                  backgroundDecoration:
+                      BoxDecoration(color: Colors.transparent),
+                  imageProvider: CachedNetworkImageProvider(data),
+                )));
+      },
+      backgroundColor: Colors.grey[200],
+    );
+  }
+
   Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: scaffoldState,
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(40.0),
         child: AppBar(
           actions: <Widget>[
-            // Image.asset(
-            //   "assets/images/home/Bell_Icon.png",
-            //   height: 14,
-            //   width: 14,
-            // ),
             Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Image.asset(
@@ -117,8 +133,13 @@ class ProductDetailState extends State<ProductDetail> {
                     child: Padding(
                         padding: EdgeInsets.only(
                             bottom: 70, left: 60, right: 60, top: 20),
-                        child: CachedNetworkImage(
-                          imageUrl: widget.productdata.image.url,
+                        child: GestureDetector(
+                          onTap: () {
+                            zoomImage(widget.productdata.image.url);
+                          },
+                          child: CachedNetworkImage(
+                            imageUrl: widget.productdata.image.url,
+                          ),
                         ))),
                 new Positioned(
                     bottom: 0,
@@ -126,22 +147,17 @@ class ProductDetailState extends State<ProductDetail> {
                     right: 0,
                     child: Container(
                         height: 120,
-                        margin: EdgeInsets.symmetric(horizontal: 18),
+                        margin: EdgeInsets.symmetric(horizontal: 0),
                         child: ListView.builder(
                             shrinkWrap: true,
                             scrollDirection: Axis.horizontal,
                             itemCount: widget.productdata.thumbnails.length,
                             itemBuilder: (context, index) {
                               return jewellerybox(
-                                  widget.productdata.thumbnails[index].url);
-                            })
-                        // Row(
-                        //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        //     children:
-                        //         widget.productdata.thumbnails.map<Widget>((e) {
-                        //       return Expanded(child: jewellerybox(e.url));
-                        //     }).toList())
-                        )),
+                                  zoomImage,
+                                  widget.productdata.thumbnails[index].url,
+                                  screenWidth);
+                            }))),
                 Positioned(
                     top: 16,
                     right: 16,
@@ -423,22 +439,29 @@ Widget request(context) {
       ));
 }
 
-Widget jewellerybox(url) {
-  return Container(
-      margin: EdgeInsets.all(8),
-      decoration: BoxDecoration(color: Colors.white, boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.3),
-          spreadRadius: 1,
-          blurRadius: 7,
-          offset: Offset(0, 0), // changes position of shadow
-        ),
-      ]),
-      child: CachedNetworkImage(
-        imageUrl: url,
-        height: 110,
-        width: 100,
-      ));
+Widget jewellerybox(zoom, url, screenWidth) {
+  return GestureDetector(
+    onTap: () {
+      zoom(url);
+    },
+    child: Container(
+        width: screenWidth / 3,
+        height: screenWidth / 3,
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(color: Colors.white, boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.3),
+            spreadRadius: 1,
+            blurRadius: 7,
+            offset: Offset(0, 0), // changes position of shadow
+          ),
+        ]),
+        child: CachedNetworkImage(
+          imageUrl: url,
+          height: screenWidth / 3,
+          //width: 100,
+        )),
+  );
 }
 
 Widget quantity(data) {
